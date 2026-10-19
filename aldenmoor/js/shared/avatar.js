@@ -142,6 +142,7 @@ function drawAvatar(g, x, y, face, o, t) {
   }
   const legFx = { g, x, fy, gy, pose, legCol, bootCol };
   legFx.dir = dir;
+  legFx.back = facingUp;
   legFx.soleCol = soleCol;
   legFx.female = female;
   if (seated && sideView) avatarSitLegsSide(legFx, 'far');
@@ -176,6 +177,7 @@ function drawAvatar(g, x, y, face, o, t) {
   }
 
   // side view: the upper body leans into the walk and folds forward into an attack (everything above the hips)
+  if (seated && facingUp) avatarSitProp({ g, x, fy, gy, o, bw }, pose); // seen from behind, the weapon is on the far side of the body
   const lean = sideView ? (seated ? SIT_LEAN[pose] || 0 : SO.lean + (o.moving ? 0.045 : 0) + atkR * 0.12) : 0;
   g.save();
   if (sideView && !seated && SO.hipUp) g.translate(0, -SO.hipUp); // longer legs: everything above the hips moves up
@@ -274,7 +276,7 @@ function drawAvatar(g, x, y, face, o, t) {
     atkArm === 0 ? Math.cos(face) * raise * 3 : 0,
     atkArm === 1 ? Math.cos(face) * raise * 3 : 0,
   ];
-  if (!seated && sit > 0 && fam === 'archer' && wAlpha === 0) avatarBowRest(g, x, gy, bw, o, Math.min(1, sit / 0.5));
+  if (!seated && sit > 0 && fam === 'archer' && wAlpha === 0) avatarBowRest(g, x + bw / 2 + 4, gy, bw, o, Math.min(1, sit / 0.5));
   if (seated && sideView) {
     // profile sit: the near leg and the resting weapon are drawn without the body lean (the lean tilts only the upper body)
     g.save();
@@ -284,7 +286,7 @@ function drawAvatar(g, x, y, face, o, t) {
     g.restore();
   } else if (seated) {
     avatarSitLegs(legFx, true);
-    avatarSitProp({ g, x, fy, gy, o, bw }, pose);
+    if (!facingUp) avatarSitProp({ g, x, fy, gy, o, bw }, pose); // back view: the weapon lies behind the body (drawn earlier)
     ctx.arm[0] += 3 * sit;
     ctx.arm[1] += 3 * sit;
   }
@@ -2271,73 +2273,118 @@ function avatarHair(g, x, fy, style, color, face, facingUp) {
 /* ---------- sit poses (one per job) ---------- */
 
 // front=false draws the parts behind the torso, front=true the parts in front of it.
-function avatarSitLegs({ g, x, fy, gy, pose, legCol, bootCol }, front) {
+function avatarSitLegs({ g, x, fy, gy, pose, legCol, bootCol, soleCol, back }, front) {
   const hy = fy - 9; // hip height
-  const leg = (pts) => {
-    g.strokeStyle = legCol;
-    g.lineWidth = 5;
+  // trousers: base colour, a darker underside and a thin rim light so the legs still read against the dark ground
+  const leg = (pts, w = 5.2) => {
+    const path = (dx, dy) => {
+      g.beginPath();
+      pts.forEach(([px, py], i) => (i ? g.lineTo(px + dx, py + dy) : g.moveTo(px + dx, py + dy)));
+      g.stroke();
+    };
     g.lineCap = 'round';
     g.lineJoin = 'round';
-    g.beginPath();
-    pts.forEach(([px, py], i) => (i ? g.lineTo(px, py) : g.moveTo(px, py)));
-    g.stroke();
+    g.strokeStyle = legCol;
+    g.lineWidth = w;
+    path(0, 0);
+    g.strokeStyle = 'rgba(0,0,0,.22)';
+    g.lineWidth = w * 0.4;
+    path(w * 0.2, w * 0.22);
+    g.strokeStyle = 'rgba(255,255,255,.16)';
+    g.lineWidth = 1.4;
+    path(-w * 0.2, -w * 0.24);
     g.lineCap = 'butt';
   };
-  const boot = (bx, by, w = 6) => {
+  const knee = (kx, ky) => {
+    g.fillStyle = 'rgba(255,255,255,.08)';
+    g.beginPath();
+    g.arc(kx, ky, 2.3, 0, 6.28);
+    g.fill();
+  };
+  const boot = (bx, by, w = 6.4) => {
     g.fillStyle = bootCol;
-    g.fillRect(bx, by, w, 4);
+    avatarRound(g, bx, by, w, 4.4, 1.8);
+    g.fill();
+    g.fillStyle = 'rgba(255,255,255,.22)';
+    g.fillRect(bx + 1, by + 0.6, w * 0.5, 0.9);
+    if (soleCol) {
+      g.fillStyle = soleCol;
+      g.fillRect(bx, by + 3.2, w, 1.2);
+    }
   };
   if (pose === 'forward') {
-    // swordsman: relaxed, legs stretched out toward the viewer
-    if (front) return;
-    leg([[x - 3.5, hy], [x - 5.5, hy + 8]]);
-    leg([[x + 3.5, hy], [x + 5.5, hy + 8]]);
-    boot(x - 9, hy + 8);
-    boot(x + 3, hy + 8);
+    // swordsman: relaxed, legs stretched out toward the viewer (from behind they are hidden by the body)
+    if (front || back) return;
+    leg([[x - 3.5, hy + 1], [x - 5, hy + 6], [x - 6.5, hy + 9.5]]);
+    leg([[x + 3.5, hy + 1], [x + 5, hy + 6], [x + 6.5, hy + 9.5]]);
+    knee(x - 5, hy + 5.6);
+    knee(x + 5, hy + 5.6);
+    boot(x - 10, hy + 9.2);
+    boot(x + 3.6, hy + 9.2);
   } else if (pose === 'cross') {
-    // waif: cross-legged
-    if (!front) {
-      leg([[x - 4, hy], [x - 12, hy + 5]]);
-      leg([[x + 4, hy], [x + 12, hy + 5]]);
-    } else {
-      leg([[x - 12, hy + 5], [x + 3, hy + 8]]);
-      leg([[x + 12, hy + 5], [x - 3, hy + 8]]);
-      boot(x + 1, hy + 7);
-      boot(x - 7, hy + 7);
+    // waif: cross-legged, knees out to the sides, ankles crossed in the middle (from behind: just the thighs)
+    if (!front) return;
+    if (back) {
+      leg([[x - 4, hy + 1.5], [x - 12.5, hy + 4.5]]);
+      leg([[x + 4, hy + 1.5], [x + 12.5, hy + 4.5]]);
+      return;
     }
+    leg([[x - 4, hy + 1.5], [x - 12.5, hy + 4.5], [x + 2.5, hy + 8.4]]);
+    leg([[x + 4, hy + 1.5], [x + 12.5, hy + 4.5], [x - 2.5, hy + 8.4]]);
+    knee(x - 12.5, hy + 4.5);
+    knee(x + 12.5, hy + 4.5);
+    boot(x + 0.4, hy + 7.4, 6);
+    boot(x - 6.4, hy + 7.4, 6);
   } else if (pose === 'kneel') {
-    // knight: on one knee
+    // knight: on one knee (from behind: both soles show)
     if (front) return;
+    if (back) {
+      leg([[x - 3.5, hy + 1], [x - 5, hy + 6]]);
+      leg([[x + 3.5, hy + 1], [x + 5, hy + 6]]);
+      boot(x - 9, hy + 6, 6.4);
+      boot(x + 2.6, hy + 6, 6.4);
+      return;
+    }
     leg([[x + 3, hy], [x + 9, hy + 6]]);
+    knee(x + 9, hy + 6);
     boot(x + 6, hy + 6);
     leg([[x - 3, hy], [x - 8, hy + 4], [x - 13, hy + 5]]);
-    boot(x - 18, hy + 3, 5);
+    boot(x - 18, hy + 3.4, 5.6);
   } else if (pose === 'squat') {
-    // assassin: low crouch, feet wide
+    // assassin: low crouch, feet wide, knees out
     if (front) return;
     leg([[x - 3, hy], [x - 9.5, hy - 1], [x - 7.5, hy + 8]]);
     leg([[x + 3, hy], [x + 9.5, hy - 1], [x + 7.5, hy + 8]]);
-    boot(x - 11, hy + 8);
-    boot(x + 5, hy + 8);
+    if (!back) {
+      knee(x - 9.5, hy - 1);
+      knee(x + 9.5, hy - 1);
+    }
+    boot(x - 11, hy + 7.6);
+    boot(x + 4.6, hy + 7.6);
   } else if (pose === 'hug') {
-    // archer: knees up, bow across them
+    // archer: knees up, bow standing beside
     if (!front) {
       leg([[x - 8, hy - 2], [x - 6, hy + 7]]);
       leg([[x + 8, hy - 2], [x + 6, hy + 7]]);
-      boot(x - 9, hy + 7);
-      boot(x + 3, hy + 7);
-    } else {
+      boot(x - 9.2, hy + 6.8);
+      boot(x + 2.8, hy + 6.8);
+    } else if (!back) {
       leg([[x - 3, hy + 1], [x - 8, hy - 3]]);
       leg([[x + 3, hy + 1], [x + 8, hy - 3]]);
+      knee(x - 8, hy - 3);
+      knee(x + 8, hy - 3);
     }
   } else if (pose === 'kneeup') {
     // ranger: one leg stretched out, one knee up
     if (!front) {
       leg([[x - 3, hy], [x - 10, hy + 8]]);
-      boot(x - 14, hy + 8);
+      boot(x - 14.4, hy + 7.6);
       leg([[x + 8, hy - 3], [x + 6, hy + 8]]);
-      boot(x + 3, hy + 7);
-    } else leg([[x + 3, hy + 1], [x + 8, hy - 3]]);
+      boot(x + 2.8, hy + 7.4);
+    } else if (!back) {
+      leg([[x + 3, hy + 1], [x + 8, hy - 3]]);
+      knee(x + 8, hy - 3);
+    }
   }
 }
 
@@ -2398,139 +2445,78 @@ function avatarSitLegsSide({ g, x, fy, dir, pose, legCol, bootCol, soleCol }, wh
 
 // The class weapon next to the profile-seated character (drawn before the arms so the hands grip it).
 function avatarSitPropSide({ g, x, fy, gy, o, dir, lean }, pose) {
-  const t2 = o.tier === 2,
-    hy = fy - 9,
+  const hy = fy - 9,
     X = (u) => x + dir * u;
-  if (pose === 'kneel') {
-    // sword planted in front of the knee, both hands on the pommel
-    const u = 10.5;
-    g.fillStyle = t2 ? '#fff1a8' : '#e8eef2';
-    g.beginPath();
-    g.moveTo(X(u - 2), hy - 8);
-    g.lineTo(X(u + 2), hy - 8);
-    g.lineTo(X(u + 1.2), hy + 5);
-    g.lineTo(X(u), hy + 7);
-    g.lineTo(X(u - 1.2), hy + 5);
-    g.fill();
-    g.fillStyle = '#d9b24a';
-    g.fillRect(X(u) - 4, hy - 10.5, 8, 2.6);
-    g.fillStyle = '#6b4a2a';
-    g.fillRect(X(u) - 1.3, hy - 16, 2.6, 5.5);
-    g.fillStyle = '#d9b24a';
-    g.beginPath();
-    g.arc(X(u), hy - 16.6, 1.8, 0, 6.28);
-    g.fill();
-  } else if (pose === 'forward') {
-    // sword laid on the ground behind him
-    g.fillStyle = '#e8eef2';
-    g.beginPath();
-    g.moveTo(X(-6), hy + 2.4);
-    g.lineTo(X(-27), hy + 2.9);
-    g.lineTo(X(-30), hy + 4);
-    g.lineTo(X(-27), hy + 5.1);
-    g.lineTo(X(-6), hy + 5.6);
-    g.fill();
-    g.fillStyle = '#d9b24a';
-    g.fillRect(X(-6) - (dir > 0 ? 3 : 0), hy + 0.6, 3, 7);
-    g.fillStyle = '#6b4a2a';
-    g.fillRect(X(-1.5) - (dir > 0 ? 3 : 0), hy + 3, 4.5, 2.6);
-  } else if (pose === 'cross') {
-    // knife stuck in the ground in front of her
-    const u = 17;
-    g.fillStyle = '#6b4a2a';
-    g.fillRect(X(u) - 1.5, hy - 3.5, 3, 5.5);
-    g.fillStyle = '#e8eef2';
-    g.beginPath();
-    g.moveTo(X(u) - 2.3, hy + 2);
-    g.lineTo(X(u) + 2.3, hy + 2);
-    g.lineTo(X(u), hy + 9);
-    g.fill();
-  } else if (pose === 'squat') {
-    // dagger in a reverse grip, held at the knee
-    const u = 11.2 + lean * 8;
-    g.fillStyle = '#6b4a2a';
-    g.fillRect(X(u) - 1.5, hy - 12.5, 3, 4.5);
-    g.fillStyle = '#b9a4ff';
-    g.beginPath();
-    g.moveTo(X(u) - 2.1, hy - 8);
-    g.lineTo(X(u) + 2.1, hy - 8);
-    g.lineTo(X(u), hy + 2.5);
-    g.fill();
-  } else if (pose === 'hug' || pose === 'kneeup') {
+  if (pose === 'kneel') avatarRestWeapon(g, X(10.5), hy - 14.5, Math.PI / 2, o, 24); // planted in front of the knee
+  else if (pose === 'forward') avatarRestWeapon(g, X(-4), hy + 4, dir > 0 ? Math.PI : 0, o, 40); // laid on the ground behind him
+  else if (pose === 'cross') avatarRestWeapon(g, X(17), hy - 5, Math.PI / 2, o, 16); // stuck in the ground in front
+  else if (pose === 'squat') avatarRestWeapon(g, X(11.2 + lean * 8), hy - 11.5, Math.PI / 2, o, 18); // reverse grip at the knee
+  else if (pose === 'hug' || pose === 'kneeup') {
     // bow standing upright in front of the feet
     avatarWeapon(g, X(pose === 'hug' ? 15 : 17), gy - 6, dir > 0 ? 0 : Math.PI, { ...o, weapon: 'bow', swing: 0 }, 1);
   }
 }
 
+// A melee weapon at rest: the grip is at (px, py), the blade points along `ang`, `len` = total length.
+// Uses the equipped weapon's own art when there is one, otherwise the plain class weapon.
+function avatarRestWeapon(g, px, py, ang, o, len) {
+  const knife = o.weapon === 'knife',
+    w = o.gear && o.gear.weapon,
+    spr = w ? avatarWeaponSprite(w, false) : null;
+  g.save();
+  g.translate(px, py);
+  g.rotate(ang);
+  if (spr) {
+    const L = spr.L,
+      sc = len / L,
+      pv = 28 + L / 2 - (knife ? 0.22 : 0.14) * L;
+    g.rotate(Math.PI / 2);
+    g.scale(Math.cos(ang) < 0 ? -1 : 1, 1);
+    g.scale(sc, sc);
+    g.drawImage(spr.cv, -28, -pv, 56, 56);
+  } else {
+    const gearCol = w ? w.col : null,
+      sc = len / (knife ? 24 : 42);
+    g.scale(sc, sc);
+    if (knife) {
+      g.fillStyle = '#6b4a2a';
+      g.fillRect(2, -2, 6, 4);
+      g.fillStyle = gearCol || (o.tier === 2 ? '#b9a4ff' : '#e8eef2');
+      g.beginPath();
+      g.moveTo(8, -3);
+      g.lineTo(22, 0);
+      g.lineTo(8, 3);
+      g.fill();
+    } else {
+      g.fillStyle = '#6b4a2a';
+      g.fillRect(0, -2, 7, 4);
+      g.fillStyle = '#d9b24a';
+      g.fillRect(7, -6, 3, 12);
+      g.fillStyle = gearCol || (o.tier === 2 ? '#fff1a8' : '#e8eef2');
+      g.fillRect(10, -2.5, 26, 5);
+      g.beginPath();
+      g.moveTo(36, -2.5);
+      g.lineTo(41, 0);
+      g.lineTo(36, 2.5);
+      g.fill();
+    }
+  }
+  g.restore();
+}
+
 // The class weapon rests next to / on the seated character.
 function avatarSitProp({ g, x, fy, gy, o, bw }, pose) {
-  const t2 = o.tier === 2;
-  if (pose === 'kneel') {
-    // sword planted in front, tip on the ground
-    const top = fy - 13;
-    g.fillStyle = t2 ? '#fff1a8' : '#e8eef2';
-    g.beginPath();
-    g.moveTo(x - 2.5, top);
-    g.lineTo(x + 2.5, top);
-    g.lineTo(x + 3.5, gy + 7);
-    g.lineTo(x + 1.5, gy + 10);
-    g.lineTo(x - 0.5, gy + 7);
-    g.fill();
-    g.fillStyle = '#d9b24a';
-    g.fillRect(x - 6, top - 3, 12, 3);
-    g.fillStyle = '#6b4a2a';
-    g.fillRect(x - 1.5, top - 9, 3, 6);
-    g.fillStyle = '#d9b24a';
-    g.beginPath();
-    g.arc(x, top - 10, 2, 0, 6.28);
-    g.fill();
-  } else if (pose === 'forward') {
-    // sword laid across the lap
-    g.save();
-    g.translate(x, fy - 6);
-    g.rotate(-0.1);
-    g.fillStyle = '#e8eef2';
-    g.fillRect(-20, -2, 30, 4);
-    g.beginPath();
-    g.moveTo(-20, -2);
-    g.lineTo(-25, 0);
-    g.lineTo(-20, 2);
-    g.fill();
-    g.fillStyle = '#d9b24a';
-    g.fillRect(10, -5, 3, 10);
-    g.fillStyle = '#6b4a2a';
-    g.fillRect(13, -1.5, 7, 3);
-    g.restore();
-  } else if (pose === 'cross') {
-    // knife stuck in the ground beside her/him
-    g.fillStyle = '#6b4a2a';
-    g.fillRect(x + 14, gy - 7, 3, 6);
-    g.fillStyle = '#e8eef2';
-    g.beginPath();
-    g.moveTo(x + 13.2, gy - 1);
-    g.lineTo(x + 17.8, gy - 1);
-    g.lineTo(x + 15.5, gy + 7);
-    g.fill();
-  } else if (pose === 'squat') {
-    // dagger held in a reverse grip
-    g.fillStyle = '#6b4a2a';
-    g.fillRect(x + 10, fy - 12, 3, 4);
-    g.fillStyle = '#b9a4ff';
-    g.beginPath();
-    g.moveTo(x + 9.5, fy - 8);
-    g.lineTo(x + 13.5, fy - 8);
-    g.lineTo(x + 11.5, fy + 3);
-    g.fill();
-  } else if (pose === 'hug') {
-    avatarBowRest(g, x, gy, bw, o, 1); // bow held upright beside
-  } else if (pose === 'kneeup') {
-    avatarBowRest(g, x, gy, bw, o, 1); // bow held upright beside
-  }
+  // the weapon that lies next to the seated hero is the equipped one (its real art), not a generic prop
+  if (pose === 'kneel') avatarRestWeapon(g, x, fy - 19, Math.PI / 2, o, 24); // planted in front, tip on the ground
+  else if (pose === 'forward') avatarRestWeapon(g, x + 10, fy - 8.5, Math.PI - 0.08, o, 34); // laid across the lap
+  else if (pose === 'cross') avatarRestWeapon(g, x + 15, gy - 8, Math.PI / 2, o, 16); // stuck in the ground beside
+  else if (pose === 'squat') avatarRestWeapon(g, x + 11.5, fy - 11, Math.PI / 2, o, 18); // reverse grip
+  else if (pose === 'hug' || pose === 'kneeup') avatarBowRest(g, x + bw / 2 + 4, gy, bw, o, 1); // bow standing beside
 }
 
 // Bow standing upright on the ground right next to the character; the hanging arm covers the grip.
 function avatarBowRest(g, x, gy, bw, o, alpha) {
-  avatarWeapon(g, x + bw / 2 - 13.5, gy - 6, 0, { ...o, weapon: 'bow', swing: 0 }, alpha);
+  avatarWeapon(g, x - 2, gy - 6, 0, { ...o, weapon: 'bow', swing: 0 }, alpha); // x already includes the offset beside the body
 }
 
 // Front hand (arm reaches out to the grip) and, while drawing, the string hand.
