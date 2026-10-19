@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Aldenmoor · Knife sound test</title>
+<style>
+  body { font: 15px system-ui, sans-serif; background: #14121c; color: #eee; max-width: 720px; margin: 24px auto; padding: 0 16px; }
+  h1 { font-size: 20px; } p { color: #aab; }
+  .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; background: #1f1c2b; border-radius: 10px; padding: 10px 12px; margin: 8px 0; }
+  .row b { flex: 1 1 100%; }
+  button { background: #3b3358; color: #fff; border: 0; border-radius: 8px; padding: 8px 14px; font-size: 14px; cursor: pointer; }
+  button:hover { background: #55478a; }
+</style>
+</head>
+<body>
+<h1>Knife sound test (actual game engine)</h1>
+<p>Ito ang mismong <code>js/audio/sfx.js</code> ng laro. Pindutin ang button para marinig. Para i-lock ang napili, palitan ang <code>KNIFE_STYLE</code> sa sfx.js.</p>
+<div id="rows"></div>
+<script src="../js/audio/sfx.js"></script>
+<script>
+  const styles = { 0: 'Current (original)', A: 'A · Combat Knife', B: 'B · Switchblade Shing', C: 'C · Butterfly Flick', D: 'D · Cinematic Slash', E: 'E · Stealth Stab', F: 'F · Razor Slice', G: 'G · Steel Scrape', H: 'H · Gritty Stab', I: 'I · Shadow Blink', J: 'J · Dual Fang' };
+  const strike = (crit) => { sfxSwing('knife', 'arc', 0); setTimeout(() => { _hitG = 0; sfxHit('knife', { crit }); }, 30); };
+  const combo = (gap, n) => { for (let i = 0; i < n; i++) setTimeout(() => strike(i === n - 1), i * gap); };
+  const rows = document.getElementById('rows');
+  for (const [id, name] of Object.entries(styles).reverse()) {
+    const d = document.createElement('div'); d.className = 'row';
+    d.innerHTML = '<b>' + name + '</b>';
+    const add = (label, fn) => { const b = document.createElement('button'); b.textContent = label; b.onclick = () => { KNIFE_STYLE = id; fn(); }; d.appendChild(b); };
+    add('Swing', () => sfxSwing('knife', 'arc', 0));
+    add('Hit', () => strike(false));
+    add('Crit', () => strike(true));
+    add('Waif combo', () => combo(300, 4));
+    add('Assassin combo', () => combo(130, 6));
+    rows.appendChild(d);
+  }
+</script>
+</body>
+</html>

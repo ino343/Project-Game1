@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Log in · Aldenmoor Online</title>
+    <meta name="theme-color" content="#0a1220" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;800&family=Pixelify+Sans:wght@500;700&family=Cinzel:wght@600;700&display=swap"
+    />
+    <link rel="stylesheet" href="../css/base.css?v=t31" />
+    <link rel="stylesheet" href="../css/components.css?v=t31" />
+    <link rel="stylesheet" href="../css/scene.css?v=t31" />
+    <link rel="stylesheet" href="../css/auth.css?v=t31" />
+    <link rel="stylesheet" href="../css/classic.css?v=t31" />
+  </head>
+  <body class="auth">
+    <div class="backdrop" aria-hidden="true">
+      <i class="stars"></i><i class="moon"></i><i class="hills far"></i><i class="hills near"></i
+      ><i class="hills fade"></i>
+      <i class="flies"><b></b><b></b><b></b><b></b><b></b><b></b><b></b></i>
+    </div>
+    <button id="musicToggle" class="ghost floating" type="button" aria-pressed="true">Music: on</button>
+
+    <main>
+      <div class="brand">
+        <div class="crest" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2.5 20 6v6c0 4.6-3.3 8.1-8 9.5C7.3 20.1 4 16.6 4 12V6l8-3.5Z" />
+            <path d="m12 7 1.4 3 3.1.4-2.3 2.1.6 3.1L12 14l-2.8 1.6.6-3.1-2.3-2.1 3.1-.4L12 7Z" fill="currentColor" stroke="none" />
+          </svg>
+        </div>
+        <h1>Aldenmoor</h1>
+        <p>Online</p>
+      </div>
+
+      <section class="card" aria-labelledby="authTitle">
+        <div class="tabs" role="tablist" aria-label="Account">
+          <button class="tab" type="button" role="tab" data-mode="login" aria-selected="true">Log in</button>
+          <button class="tab" type="button" role="tab" data-mode="register" aria-selected="false">
+            Create account
+          </button>
+        </div>
+
+        <header>
+          <h2 id="authTitle">Welcome back</h2>
+          <p id="authSub">Log in to continue your adventure.</p>
+        </header>
+
+        <form id="authForm" class="stack" novalidate>
+          <div class="field">
+            <label for="username">Username</label>
+            <input
+              id="username"
+              name="username"
+              maxlength="16"
+              autocomplete="username"
+              autocapitalize="none"
+              spellcheck="false"
+              placeholder="Your username"
+              required
+            />
+            <p class="help" id="userHelp" hidden>3 to 16 letters, numbers or underscores.</p>
+          </div>
+          <div class="field">
+            <label for="password">Password</label>
+            <div class="passwrap">
+              <input
+                id="password"
+                name="password"
+                type="password"
+                autocomplete="current-password"
+                placeholder="Your password"
+                required
+              />
+              <button id="showPass" type="button" aria-pressed="false" aria-label="Show password">Show</button>
+            </div>
+            <p class="help" id="passHelp" hidden>At least 6 characters.</p>
+          </div>
+          <div class="field" id="confirmRow" hidden>
+            <label for="confirm">Confirm password</label>
+            <input id="confirm" name="confirm" type="password" autocomplete="new-password" placeholder="Repeat your password" />
+          </div>
+          <p id="authMsg" class="msg" role="alert" hidden></p>
+          <button id="authSubmit" class="primary" type="submit">Log in</button>
+        </form>
+
+        <p class="note">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2" /><path d="M8 11V8a4 4 0 0 1 8 0v3" /></svg>
+          Accounts are stored in this browser only.
+        </p>
+      </section>
+    </main>
+
+    <script src="../js/shared/utils.js?v=t31"></script>
+    <script src="../js/shared/storage.js?v=t31"></script>
+    <script src="../js/audio/sfx.js?v=t31"></script>
+    <script src="../js/audio/music.js?v=t31"></script>
+    <script src="../js/audio/menu-music.js?v=t31"></script>
+    <script src="../js/auth/login.js?v=t31"></script>
+  </body>
+</html>
