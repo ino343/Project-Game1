@@ -258,6 +258,27 @@ function buildVillage(M, D) {
     const a = Math.PI / 4 + (i * Math.PI) / 2;
     M.obs.push({ x: PZ.x + Math.cos(a) * (PZ.rx * 0.74), y: PZ.y + Math.sin(a) * (PZ.ry * 0.74), r: 15, type: 'bench', fl: Math.cos(a) > 0 ? 1 : -1 });
   }
+  // market, well, hay and clutter (all kept off the roads, plaza, yard and doors)
+  const Yd = VILLAGE_YARD,
+    free = (x, y, r) =>
+      !M.paths.some((p) => segDist(x, y, p[0], p[1]) < 34 + r) &&
+      Math.hypot((x - PZ.x) / (PZ.rx + 26 + r), (y - PZ.y) / (PZ.ry + 26 + r)) > 1 &&
+      !rectNear(x, y, Yd, 24 + r) &&
+      !M.obs.some((o) => (o.w ? rectNear(x, y, o, 18 + r) : Math.hypot(o.x - x, o.y - y) < o.r + r + 10)) &&
+      !M.npcs.some((n) => Math.hypot(n.x - x, n.y - y) < 70 + r) &&
+      !M.portals.some((p) => Math.hypot(p.x - x, p.y - y) < 90 + r);
+  const put = (o, r) => {
+    if (free(o.x + (o.w ? o.w / 2 : 0), o.y + (o.h ? o.h / 2 : 0), r)) M.obs.push(o);
+  };
+  [['fruit', '#c0392b'], ['bread', '#d99a3a'], ['pots', '#4a5ab8'], ['cloth', '#2f9d7f']].forEach(([goods, col], i) => put({ x: 1440 + i * 120, y: 885, w: 96, h: 32, type: 'stall', goods, col }, 30));
+  put({ x: 200, y: 930, r: 22, type: 'well' }, 24);
+  put({ x: 2040, y: 742, r: 8, type: 'signpost', boards: [{ t: 'Sunny Meadow', dir: 1 }, { t: 'Village', dir: -1 }] }, 8);
+  for (const [x, y] of [[150, 1000], [182, 1018], [128, 1030], [1980, 940], [2012, 962], [1700, 640], [1740, 655]]) put({ x, y, r: 14, type: 'hay' }, 14);
+  BUILDINGS.forEach((b, i) => {
+    const by = b.y + b.h - 2;
+    put(i % 2 ? { x: b.x - 42, y: by, r: 13, type: 'vbarrel' } : { x: b.x - 44, y: by, r: 14, type: 'vcrate', n: 2 }, 10);
+    put(i % 3 ? { x: b.x + b.w + 44, y: by, r: 14, type: 'vcrate', n: 1 } : { x: b.x + b.w + 42, y: by, r: 13, type: 'vbarrel' }, 10);
+  });
   // street lamps along the main roads
   const doors = M.portals.filter((p) => p.door).map((p) => [p.x, p.y]);
   for (let ri2 = 0; ri2 < M.mainRoads.length; ri2++) {
@@ -288,7 +309,7 @@ function buildVillage(M, D) {
 }
 function villageTrees(M, keep) {
   const PZ = VILLAGE_PLAZA,
-    houses = M.obs.filter((o) => o.type === 'building'),
+    houses = M.obs.filter((o) => o.type === 'building' || o.type === 'stall'),
     Y = M.yard,
     okPlace = (x, y, d) =>
       !houses.some((h) => rectNear(x, y, h, d + 20)) &&

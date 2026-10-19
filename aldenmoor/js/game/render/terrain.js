@@ -4,7 +4,7 @@
 /* ---------------- drawing ---------------- */
 const THEMES = {
   grass: { a: '#5fae4a', b: '#559f43', tuft: '#3f8a37', fl: ['#f4e86a', '#fff', '#f08ab0'] },
-  town: { a: '#6cbf58', b: '#62b24e', tuft: '#46954a', fl: ['#fff3a0', '#fff', '#ff9ac0'] },
+  town: { a: '#68b04f', b: '#5ea146', tuft: '#43853c', fl: ['#fff3a0', '#fff', '#ff9ac0'] },
   forest: { a: '#3f7f45', b: '#38723e', tuft: '#2a5e33', fl: ['#c9a24a', '#d9d0a0', '#8a5a3a'] },
   ruins: { a: '#7b7468', b: '#70695e', tuft: '#5a554c', fl: ['#9a9488', '#5a554c', '#b0aa9c'] },
   swamp: { a: '#4a5a3c', b: '#415034', tuft: '#2f3d28', fl: ['#9acd32', '#c8d84a', '#7a4a7a'] },

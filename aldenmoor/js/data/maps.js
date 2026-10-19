@@ -179,20 +179,20 @@ const MAPDEF = {
  * To add a building: add a row here, an INTERIORS entry below, and NPCS with map:'in_<id>'.
  * ---------------------------------------------------------------------------------------------- */
 const BUILDINGS = [
-  // north avenue
-  { id: 'academy', n: "Adventurer's Academy", x: 330, y: 270, w: 250, h: 150, wall: '#ece8e0', roof: '#4a5ab8', accent: '#7a5cff', icon: 'scroll', style: 'flat' },
-  { id: 'potion', n: 'Alchemy & Potions', x: 650, y: 300, w: 190, h: 120, wall: '#e3f1ea', roof: '#2f9d7f', accent: '#2fbf94', icon: 'potion', style: 'gable' },
-  { id: 'guild', n: 'Guild Hall', x: 930, y: 220, w: 340, h: 200, wall: '#e9dfd2', roof: '#9a2f2f', accent: '#e0553f', icon: 'shield', style: 'gable' },
-  { id: 'trader', n: 'Material Exchange', x: 1370, y: 300, w: 190, h: 120, wall: '#efe6d6', roof: '#8a6a3c', accent: '#d99a3a', icon: 'crate', style: 'flat' },
-  { id: 'quest', n: 'Quest Hall', x: 1620, y: 270, w: 250, h: 150, wall: '#e6e4ee', roof: '#3d4d6e', accent: '#f2b84b', icon: 'board', style: 'flat' },
+  // north avenue (style: 'gable' = steep tiled gable, 'hip' = wide hip roof, 'thatch' = thatched cottage; mat: 'stone' = stone walls, else timber frame)
+  { id: 'academy', n: "Adventurer's Academy", x: 330, y: 270, w: 250, h: 150, wall: '#e8dfc8', roof: '#3f5aa8', accent: '#7a5cff', icon: 'scroll', style: 'hip' },
+  { id: 'potion', n: 'Alchemy & Potions', x: 650, y: 300, w: 190, h: 120, wall: '#e0e6c8', roof: '#4c8a55', accent: '#2fbf94', icon: 'potion', style: 'gable' },
+  { id: 'guild', n: 'Guild Hall', x: 930, y: 220, w: 340, h: 200, wall: '#e6d8bc', roof: '#962f2a', accent: '#e0553f', icon: 'shield', style: 'gable' },
+  { id: 'trader', n: 'Material Exchange', x: 1370, y: 300, w: 190, h: 120, wall: '#e8d8b2', roof: '#c4a050', accent: '#d99a3a', icon: 'crate', style: 'thatch' },
+  { id: 'quest', n: 'Quest Hall', x: 1620, y: 270, w: 250, h: 150, wall: '#ded5c2', roof: '#4a5878', accent: '#f2b84b', icon: 'board', style: 'hip' },
   // west / east of the plaza
-  { id: 'armory', n: 'Armory Hall', x: 240, y: 600, w: 300, h: 160, wall: '#dfe3e8', roof: '#4b5563', accent: '#e0604d', icon: 'sword', style: 'flat' },
-  { id: 'sage', n: "Sage's Tower", x: 660, y: 610, w: 170, h: 130, wall: '#e8e1f2', roof: '#6b46b8', accent: '#b07aff', icon: 'orb', style: 'gable' },
-  { id: 'pets', n: 'Pet Emporium', x: 1370, y: 610, w: 190, h: 130, wall: '#fbe9ef', roof: '#d9608f', accent: '#ff7aa8', icon: 'paw', style: 'gable' },
+  { id: 'armory', n: 'Armory Hall', x: 240, y: 600, w: 300, h: 160, wall: '#b9b4aa', roof: '#4b4f58', accent: '#e0604d', icon: 'sword', style: 'hip', mat: 'stone' },
+  { id: 'sage', n: "Sage's Tower", x: 660, y: 610, w: 170, h: 130, wall: '#c9c1d8', roof: '#6b46b8', accent: '#b07aff', icon: 'orb', style: 'gable', mat: 'stone' },
+  { id: 'pets', n: 'Pet Emporium', x: 1370, y: 610, w: 190, h: 130, wall: '#f0dcc8', roof: '#c8a45a', accent: '#ff7aa8', icon: 'paw', style: 'thatch' },
   // south avenue
-  { id: 'fashion', n: 'Fashion Street', x: 330, y: 1010, w: 290, h: 140, wall: '#f6e6f2', roof: '#a44a94', accent: '#ff8bd0', icon: 'hanger', style: 'flat' },
-  { id: 'bank', n: 'Aldenmoor Bank', x: 800, y: 1030, w: 200, h: 120, wall: '#e5ebe6', roof: '#35564a', accent: '#f2c14b', icon: 'coin', style: 'flat' },
-  { id: 'warp', n: 'Waystation', x: 1200, y: 1030, w: 200, h: 120, wall: '#e0eaf6', roof: '#2b4b7a', accent: '#4fc3ff', icon: 'ring', style: 'flat' },
+  { id: 'fashion', n: 'Fashion Street', x: 330, y: 1010, w: 290, h: 140, wall: '#efd9d2', roof: '#9a4a6a', accent: '#ff8bd0', icon: 'hanger', style: 'hip' },
+  { id: 'bank', n: 'Aldenmoor Bank', x: 800, y: 1030, w: 200, h: 120, wall: '#bfc3b6', roof: '#35564a', accent: '#f2c14b', icon: 'coin', style: 'hip', mat: 'stone' },
+  { id: 'warp', n: 'Waystation', x: 1200, y: 1030, w: 200, h: 120, wall: '#c3c9d6', roof: '#2b4b7a', accent: '#4fc3ff', icon: 'ring', style: 'hip', mat: 'stone' },
 ];
 // main roads of the village: [from, to] segments (door stubs are added from BUILDINGS in world.js)
 const VILLAGE_MAIN_ROADS = [
