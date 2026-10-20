@@ -1,0 +1,86 @@
+/* Design tokens and global resets shared by every page. */
+/* Classic MMORPG theme: dark leather + bronze trim, parchment text, gold highlights. */
+:root {
+  /* surfaces */
+  --bg: #0d0905;
+  --panel: #2a2118;
+  --panel2: #372a1d;
+  --panel3: #4a3a27;
+  --inset: #140e08;
+  --line: #7a5c2c;
+  --line-soft: #46341d;
+
+  /* text */
+  --fg: #f4e9cf;
+  --dim: #c2ad82;
+  --mute: #8d7a58;
+
+  /* brand + status */
+  --accent: #e8b744;
+  --accent-hi: #ffd987;
+  --accent-lo: #b9831f;
+  --on-accent: #1d1303;
+  --hp: #d23a33;
+  --mp: #3d7be0;
+  --exp: #e6c23a;
+  --ok: #7fe08a;
+  --danger: #ff6b61;
+  --magic: #b79cff;
+
+  /* shape + depth (classic UIs are square and bevelled) */
+  --r-sm: 2px;
+  --r: 3px;
+  --r-lg: 4px;
+  --shadow: 0 14px 40px rgba(0, 0, 0, 0.6);
+  --shadow-sm: 0 4px 14px rgba(0, 0, 0, 0.45);
+  --hi: inset 0 1px 0 rgba(255, 224, 150, 0.1);
+  --focus: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent);
+
+  --f-display: 'Pixelify Sans', 'Courier New', monospace;
+  --f-title: 'Cinzel', 'Trajan Pro', Georgia, 'Times New Roman', serif;
+  --f-body: 'Nunito Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  color-scheme: dark;
+}
+* {
+  box-sizing: border-box;
+}
+[hidden] {
+  display: none !important;
+}
+html {
+  height: 100%;
+}
+body {
+  margin: 0;
+  min-height: 100%;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--f-body);
+  font-size: 14px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: none;
+  box-shadow: var(--focus);
+}
+::selection {
+  background: color-mix(in srgb, var(--accent) 40%, transparent);
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}

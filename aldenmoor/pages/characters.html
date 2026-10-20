@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Choose your hero · Aldenmoor Online</title>
+    <meta name="theme-color" content="#0a1220" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;800&family=Pixelify+Sans:wght@500;700&family=Cinzel:wght@600;700&display=swap"
+    />
+    <link rel="stylesheet" href="../css/base.css?v=t32" />
+    <link rel="stylesheet" href="../css/components.css?v=t32" />
+    <link rel="stylesheet" href="../css/scene.css?v=t32" />
+    <link rel="stylesheet" href="../css/characters.css?v=t32" />
+    <link rel="stylesheet" href="../css/classic.css?v=t32" />
+  </head>
+  <body class="characters">
+    <div class="backdrop" aria-hidden="true">
+      <i class="stars"></i><i class="moon"></i><i class="hills far"></i><i class="hills near"></i
+      ><i class="hills fade"></i>
+      <i class="flies"><b></b><b></b><b></b><b></b><b></b><b></b><b></b></i>
+    </div>
+
+    <div class="page">
+      <header class="topbar">
+        <div class="logo">
+          <span class="crest" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2.5 20 6v6c0 4.6-3.3 8.1-8 9.5C7.3 20.1 4 16.6 4 12V6l8-3.5Z" />
+              <path d="m12 7 1.4 3 3.1.4-2.3 2.1.6 3.1L12 14l-2.8 1.6.6-3.1-2.3-2.1 3.1-.4L12 7Z" fill="currentColor" stroke="none" />
+            </svg>
+          </span>
+          <span class="name">Aldenmoor <small>Online</small></span>
+        </div>
+        <div class="who">
+          <span class="user"><i aria-hidden="true"></i><b id="who"></b></span>
+          <button id="musicToggle" class="ghost" type="button" aria-pressed="true">Music: on</button>
+          <button id="logout" class="ghost" type="button">Log out</button>
+        </div>
+      </header>
+
+      <main>
+        <section aria-labelledby="slotsTitle">
+          <div class="head">
+            <div>
+              <h2 id="slotsTitle">Choose your hero</h2>
+              <p>Pick a character to enter Aldenmoor, or create a new one.</p>
+            </div>
+            <span class="count" id="slotCount" aria-label="Character slots used">0 / 3</span>
+          </div>
+          <div id="slots" class="slots"></div>
+        </section>
+      </main>
+    </div>
+
+    <div id="createPanel" class="modal" role="dialog" aria-modal="true" aria-labelledby="createTitle" hidden>
+      <form id="createForm" class="sheet" novalidate>
+        <header class="sheet-head">
+          <div>
+            <h2 id="createTitle">Create your hero</h2>
+            <p>
+              Customize your look and pick a first job. At level <b id="job2Lv"></b> you can advance to your second
+              job.
+            </p>
+          </div>
+          <button id="closeCreate" class="x" type="button" aria-label="Close">✕</button>
+        </header>
+
+        <div class="sheet-body">
+          <aside class="preview">
+            <div class="stage">
+              <canvas id="preview" width="220" height="240" tabindex="0" aria-label="Character preview, drag or use the arrow keys to rotate"></canvas>
+            </div>
+            <div class="rotate" role="group" aria-label="Rotate character">
+              <button id="rotLeft" type="button" aria-label="Rotate left">&#9664;</button>
+              <button id="rotFront" type="button" class="view" title="Back to front view"><span id="viewLabel">Front</span></button>
+              <button id="rotRight" type="button" aria-label="Rotate right">&#9654;</button>
+            </div>
+            <button id="randomize" class="ghost" type="button">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 3h5v5M4 20 21 3M21 16v5h-5M15 15l6 6M4 4l5 5" /></svg>
+              Randomize look
+            </button>
+          </aside>
+
+          <div class="options">
+            <div class="field">
+              <label for="heroName">Character name</label>
+              <input id="heroName" maxlength="12" autocomplete="off" placeholder="2 to 12 characters" required />
+            </div>
+
+            <fieldset>
+              <legend>Job</legend>
+              <div id="classes" class="classes" role="group" aria-label="Job"></div>
+            </fieldset>
+
+            <div class="group">
+              <fieldset>
+                <legend>Gender</legend>
+                <div id="genders" class="seg"></div>
+              </fieldset>
+              <fieldset>
+                <legend>Hairstyle</legend>
+                <div id="hairStyles" class="seg"></div>
+              </fieldset>
+            </div>
+
+            <div class="group colors">
+              <fieldset>
+                <legend>Hair color</legend>
+                <div id="hairColors" class="swatches"></div>
+              </fieldset>
+              <fieldset>
+                <legend>Body color</legend>
+                <div id="skinColors" class="swatches"></div>
+              </fieldset>
+              <fieldset>
+                <legend>Outfit color</legend>
+                <div id="outfitColors" class="swatches"></div>
+              </fieldset>
+            </div>
+          </div>
+        </div>
+
+        <footer class="sheet-foot">
+          <p id="createMsg" class="msg" role="alert" hidden></p>
+          <div class="row">
+            <button id="cancelCreate" class="ghost" type="button">Cancel</button>
+            <button class="primary" type="submit">Create hero</button>
+          </div>
+        </footer>
+      </form>
+    </div>
+
+    <script src="../js/shared/utils.js?v=t32"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../js/shared/supabase-config.js"></script>
+    <script src="../js/shared/storage.js?v=t32"></script>
+    <script src="../js/data/config.js?v=t32"></script>
+    <script src="../js/data/jobs.js?v=t32"></script>
+    <script src="../js/data/maps.js?v=t32"></script>
+    <script src="../js/data/appearance.js?v=t32"></script>
+    <script src="../js/shared/avatar.js?v=t32"></script>
+    <script src="../js/audio/sfx.js?v=t32"></script>
+    <script src="../js/audio/music.js?v=t32"></script>
+    <script src="../js/audio/menu-music.js?v=t32"></script>
+    <script src="../js/characters/characters.js?v=t32"></script>
+  </body>
+</html>
