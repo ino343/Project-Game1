@@ -51,19 +51,34 @@
         </header>
 
         <form id="authForm" class="stack" novalidate>
-          <div class="field">
+          <div class="field" id="userRow" hidden>
             <label for="username">Username</label>
             <input
               id="username"
               name="username"
-              maxlength="16"
+              maxlength="32"
               autocomplete="username"
               autocapitalize="none"
               spellcheck="false"
               placeholder="Your username"
               required
             />
-            <p class="help" id="userHelp" hidden>3 to 16 letters, numbers or underscores.</p>
+            <p class="help" id="userHelp" hidden>3 to 32 letters, numbers or underscores.</p>
+          </div>
+          <div class="field" id="emailRow">
+            <label for="email">Email</label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              maxlength="254"
+              autocomplete="email"
+              autocapitalize="none"
+              spellcheck="false"
+              placeholder="you@example.com"
+              required
+            />
+            <p class="help" id="emailHelp" hidden>Use a real email. We will send a confirmation link to it.</p>
           </div>
           <div class="field">
             <label for="password">Password</label>

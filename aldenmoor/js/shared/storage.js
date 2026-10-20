@@ -314,24 +314,33 @@ const Store = (() => {
     }
   })();
 
-  // Supabase wants an e-mail; the game logs in with a username, so we turn it into a private fake e-mail.
-  const asEmail = (name) => String(name).trim().toLowerCase() + '@aldenmoor.game';
+  const isEmail = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v);
+  const cleanEmail = (v) => String(v).trim().toLowerCase();
 
   /* ---------- accounts ---------- */
   const Accounts = {
-    async register(name, password) {
+    // Real e-mail: Supabase sends a confirmation link. Turn ON "Confirm email" in Authentication > Providers > Email.
+    async register(name, email, password) {
       if (!sb) return fail(NOT_SET);
       name = String(name).trim();
-      if (!/^[A-Za-z0-9_]{3,16}$/.test(name)) return fail('Username must be 3-16 letters, numbers or underscores.');
+      email = cleanEmail(email);
+      if (!/^[A-Za-z0-9_]{3,32}$/.test(name)) return fail('Username must be 3-32 letters, numbers or underscores.');
+      if (!isEmail(email)) return fail('Please enter a valid email address.');
       if (String(password).length < 6) return fail('Password must be at least 6 characters.');
-      const { data, error } = await sb.auth.signUp({ email: asEmail(name), password, options: { data: { username: name } } });
+      const opts = { data: { username: name } };
+      if (/^https?:$/.test(location.protocol)) opts.emailRedirectTo = location.origin + location.pathname;
+      const { data, error } = await sb.auth.signUp({ email, password, options: opts });
       if (error) {
         const m = errMsg(error);
-        if (/already|database error/i.test(m)) return fail('That username is already taken.');
+        if (/rate limit/i.test(m)) return fail('Too many emails were sent. Please wait a while and try again.');
+        if (/already|database error/i.test(m)) return fail('That username or email is already taken.');
         return fail(m);
       }
+      // Supabase hides existing e-mails: a fake user with no identities comes back instead of an error.
+      if (data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0)
+        return fail('That email is already registered. Try logging in.');
       if (!data.session)
-        return fail('Account created, but Supabase wants an e-mail confirmation. Turn OFF "Confirm email" in Authentication > Providers > Email.');
+        return { ok: false, info: true, email, error: 'Account created! We sent a confirmation link to ' + email + '. Click it, then log in here.' };
       try {
         loadError = '';
         await loadAll(data.session.user);
@@ -342,12 +351,16 @@ const Store = (() => {
       return { ok: true, user: userId };
     },
 
-    async login(name, password) {
+    async login(email, password) {
       if (!sb) return fail(NOT_SET);
-      const { data, error } = await sb.auth.signInWithPassword({ email: asEmail(name), password });
+      email = cleanEmail(email);
+      if (!isEmail(email)) return fail('Please enter the email you signed up with.');
+      const { data, error } = await sb.auth.signInWithPassword({ email, password });
       if (error) {
-        if (/confirm/i.test(errMsg(error))) return fail('Turn OFF "Confirm email" in Supabase (Authentication > Providers > Email).');
-        return fail('Wrong username or password.');
+        const m = errMsg(error);
+        if (/confirm/i.test(m)) return fail('Please confirm your email first. Check your inbox (and spam) for the link.');
+        if (/rate limit/i.test(m)) return fail('Too many attempts. Please wait a while and try again.');
+        return fail('Wrong email or password.');
       }
       try {
         loadError = '';

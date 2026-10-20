@@ -11,6 +11,8 @@ Store.ready.then(() => {
 
   const form = $('#authForm');
   const username = $('#username');
+  const email = $('#email');
+  const userRow = $('#userRow');
   const password = $('#password');
   const confirm = $('#confirm');
   const confirmRow = $('#confirmRow');
@@ -19,7 +21,8 @@ Store.ready.then(() => {
   const tabs = [...document.querySelectorAll('.tab')];
   let mode = 'login';
 
-  function showMessage(text) {
+  function showMessage(text, ok) {
+    msg.classList.toggle('ok', !!ok);
     msg.textContent = text;
     msg.hidden = !text;
   }
@@ -29,6 +32,9 @@ Store.ready.then(() => {
     for (const t of tabs) t.setAttribute('aria-selected', String(t.dataset.mode === next));
     const register = next === 'register';
     confirmRow.hidden = !register;
+    userRow.hidden = !register;
+    username.required = register;
+    $('#emailHelp').hidden = !register;
     confirm.required = register;
     password.autocomplete = register ? 'new-password' : 'current-password';
     submit.textContent = register ? 'Create account' : 'Log in';
@@ -37,7 +43,8 @@ Store.ready.then(() => {
       ? 'Create an account to start your adventure.'
       : 'Log in to continue your adventure.';
     $('#userHelp').hidden = $('#passHelp').hidden = !register;
-    username.placeholder = register ? 'Choose a username' : 'Your username';
+    username.placeholder = 'Choose a username';
+    email.placeholder = register ? 'you@example.com' : 'The email you signed up with';
     password.placeholder = register ? 'Choose a password' : 'Your password';
     showMessage('');
   }
@@ -60,10 +67,19 @@ Store.ready.then(() => {
       return showMessage('Passwords do not match.');
     submit.disabled = true;
     try {
-      const run = mode === 'register' ? Store.Accounts.register : Store.Accounts.login;
-      const res = await run(username.value, password.value);
+      const res =
+        mode === 'register'
+          ? await Store.Accounts.register(username.value, email.value, password.value)
+          : await Store.Accounts.login(email.value, password.value);
       if (res.ok) location.replace('characters.html');
-      else showMessage(res.error);
+      else if (res.info) {
+        // Account created, waiting for the e-mail confirmation: go to the log in tab.
+        const mail = res.email;
+        password.value = confirm.value = '';
+        setMode('login');
+        email.value = mail;
+        showMessage(res.error, true);
+      } else showMessage(res.error);
     } catch (err) {
       showMessage('Something went wrong. Please try again.');
     } finally {
@@ -74,6 +90,6 @@ Store.ready.then(() => {
   setMode('login');
   if (!Store.configured) showMessage('Supabase is not set up yet: paste your Project URL and anon key in js/shared/supabase-config.js.');
   else if (Store.loadError) showMessage(Store.loadError);
-  username.focus();
+  email.focus();
   MenuMusic.start();
 });

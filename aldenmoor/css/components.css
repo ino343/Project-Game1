@@ -151,6 +151,11 @@
   border: 1px solid color-mix(in srgb, var(--danger) 45%, transparent);
   border-radius: var(--r-sm);
 }
+.msg.ok {
+  color: #7ddc8a;
+  background: color-mix(in srgb, #7ddc8a 12%, transparent);
+  border-color: color-mix(in srgb, #7ddc8a 45%, transparent);
+}
 .check {
   display: flex;
   align-items: center;
