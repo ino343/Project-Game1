@@ -156,3 +156,38 @@ body.auth {
   font-size: 12px;
   text-align: center;
 }
+
+/* ---- wide rectangle layout: fields side by side, less height ---- */
+.auth main {
+  width: min(720px, 100%);
+}
+.auth .card {
+  padding: 20px 28px;
+  gap: 14px;
+}
+.auth form.stack {
+  grid-template-columns: 1fr 1fr;
+  gap: 12px 18px;
+  align-items: start;
+}
+.auth form.stack [hidden] {
+  display: none !important;
+}
+.auth form.stack > .msg,
+.auth form.stack > .primary {
+  grid-column: 1 / -1;
+}
+.auth .card h2 {
+  font-size: 22px;
+}
+@media (max-width: 560px) {
+  .auth main {
+    width: min(430px, 100%);
+  }
+  .auth .card {
+    padding: 20px 18px;
+  }
+  .auth form.stack {
+    grid-template-columns: 1fr;
+  }
+}
