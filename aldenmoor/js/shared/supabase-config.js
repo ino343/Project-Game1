@@ -9,6 +9,6 @@
  * NEVER paste the "service_role" key here.
  */
 window.ALDENMOOR_SUPABASE = {
-  url: 'https://utzewfnmyllfdtqouwqd.supabase.co/rest/v1/',
+  url: 'https://utzewfnmyllfdtqouwqd.supabase.co',
   anonKey: 'sb_publishable_VEo3XtEbt0WJ-bCg_QYCug_a2vQe3OZ',
 };
